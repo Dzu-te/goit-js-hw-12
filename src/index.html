@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vanilla App Template</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vanilla App Template</title>
-  <link rel="stylesheet" href="./css/styles.css" />
+  <body>
+    <form class="handleSearchSubmit">
+      <label><input type="text" name="search" autofocus /></label>
 
-</head>
-
-<body>
-  <form class="handleSearchSubmit">
-    <label><input type="text" name="search" autofocus /></label>
-
-    <button type="submit">Search</button>
-  </form>
-  <div class="card_container"></div>
-  <script type="module" src="./main.js"></script>
-</body>
-
+      <button class="btn-submit" type="submit">Search</button>
+    </form>
+    <div class="card_container"></div>
+    <button class="btn-show-more is-hidden" data-action="load-more">Load more</button>
+     <div class="loader is-hidden">Loading...</div>
+    <script type="module" src="./main.js"></script>
+  </body>
 </html>
-

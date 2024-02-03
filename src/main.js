@@ -9,10 +9,16 @@ const API_KEY = '42024454-8ed2ac239bcd0125bd4fa3d9e';
 
 const form = document.querySelector('.handleSearchSubmit');
 const cardContainer = document.querySelector('.card_container');
+const loadMoreButton = document.querySelector('.btn-show-more');
+const hiddenClass = 'is-hidden';
+loadMoreButton.addEventListener("click", handleLoadMore);
 
-const loader = document.createElement('div');
-loader.classList.add('loader');
-loader.textContent = 'Loading...';
+
+const loader = document.querySelector('.loader');
+
+
+let currentPage = 1;
+let searchQuery = '';
 
 function showErrorMessage(message) {
   iziToast.error({
@@ -25,15 +31,24 @@ function showWarningMessage(message) {
   iziToast.warning({
     title: 'Warning',
     message,
-  })
+  });
+}
+
+function showInfo(message) {
+  iziToast.show({
+    title: 'Alert',
+    message,
+});
 }
 
 function showLoader() {
-  document.body.appendChild(loader);
+  // document.body.appendChild(loader);
+  loader.classList.remove(hiddenClass);
 }
 
 function hideLoader() {
-  document.body.removeChild(loader);
+  // document.body.removeChild(loader);
+  loader.classList.add(hiddenClass);
 }
 
 form.addEventListener('submit', onSearchSubmit);
@@ -47,31 +62,44 @@ function fetchImages(q) {
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
+    per_page: 15,
+    page: currentPage,
   });
-
+  console.log({q})
   const url = `${BASE_URL}?${params.toString()}`;
-
+  searchQuery = q;
   return axios.get(url);
 }
 
 async function onSearchSubmit(event) {
   event.preventDefault();
-
+  
   const searchInput = form.elements.search;
   const searchValue = searchInput.value.trim();
 
   if (!searchValue) {
-    showWarningMessage('Please enter your search term.');    
+    showWarningMessage('Please enter your search term.');
     return;
+  }
+  if (searchValue !== searchQuery) {
+    cardContainer.innerHTML = '';
+    currentPage = 1;
   }
   try {
     const response = await fetchImages(searchValue);
 
     createMarkup(response.data.hits);
+    
     initializeLightbox();
     console.log(response);
+    console.log(response.data.hits);
     if (response.data.hits.length === 0) {
+      loadMoreButton.classList.add(hiddenClass);
+      
       showErrorMessage('No results were found for your request.');
+    } else {
+      loadMoreButton.classList.remove(hiddenClass);
+      
     }
   } catch (error) {
     showErrorMessage(
@@ -83,8 +111,31 @@ async function onSearchSubmit(event) {
   }
 }
 
+// ==============================================
+
+async function handleLoadMore(event) {
+  currentPage += 1;
+
+  try {
+    const response = await fetchImages(searchQuery);
+    createMarkup(response.data.hits);
+    if (response.data.hits.length < 15) {
+      loadMoreButton.classList.add(hiddenClass);
+      showInfo("We're sorry, but you've reached the end of search results.")
+    }
+  } catch (error) {
+    showErrorMessage(
+      'Error fetching images: An error occurred while fetching images. Please try again later.'
+    );
+  } finally {
+    hideLoader();
+  }
+};
+// ===============================================
+
+  
 function createMarkup(images) {
-  cardContainer.innerHTML = '';
+  
 
   const markup = images
     .map(
@@ -117,7 +168,7 @@ function createMarkup(images) {
     )
     .join('');
 
-  cardContainer.innerHTML = markup;
+  cardContainer.innerHTML += markup;
 }
 
 function initializeLightbox() {

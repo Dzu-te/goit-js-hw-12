@@ -1,6 +1,7 @@
 a {
   text-decoration: none;
   color: black;
+  border: 1px solid #111;
 }
 
 .handleSearchSubmit {
@@ -46,4 +47,16 @@ img {
 .info-item-count {
   text-align: center;
 
+}
+ 
+.btn-show-more{
+  display: block;
+  width: auto;
+  margin: 0 auto;
+  margin-top: 20px;
+  padding: 1px 16px;
+}
+
+.is-hidden{
+  display: none;
 }
