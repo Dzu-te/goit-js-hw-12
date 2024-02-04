@@ -12,13 +12,12 @@ const cardContainer = document.querySelector('.card_container');
 const loadMoreButton = document.querySelector('.btn-show-more');
 const hiddenClass = 'is-hidden';
 loadMoreButton.addEventListener("click", handleLoadMore);
-
-
 const loader = document.querySelector('.loader');
 
 
 let currentPage = 1;
 let searchQuery = '';
+let maxPage = 0;
 
 function showErrorMessage(message) {
   iziToast.error({
@@ -129,6 +128,9 @@ async function handleLoadMore(event) {
     );
   } finally {
     hideLoader();
+    initializeLightbox();
+
+
   }
 };
 // ===============================================
