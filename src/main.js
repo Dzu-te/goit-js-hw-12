@@ -11,13 +11,13 @@ const form = document.querySelector('.handleSearchSubmit');
 const cardContainer = document.querySelector('.card_container');
 const loadMoreButton = document.querySelector('.btn-show-more');
 const hiddenClass = 'is-hidden';
-loadMoreButton.addEventListener("click", handleLoadMore);
+loadMoreButton.addEventListener('click', handleLoadMore);
 const loader = document.querySelector('.loader');
 
+const lightbox = new SimpleLightbox('.card_container a');
 
 let currentPage = 1;
 let searchQuery = '';
-let maxPage = 0;
 
 function showErrorMessage(message) {
   iziToast.error({
@@ -37,24 +37,28 @@ function showInfo(message) {
   iziToast.show({
     title: 'Alert',
     message,
-});
+  });
 }
 
 function showLoader() {
-  // document.body.appendChild(loader);
   loader.classList.remove(hiddenClass);
 }
 
 function hideLoader() {
-  // document.body.removeChild(loader);
   loader.classList.add(hiddenClass);
+}
+
+function hideLoadMoreButton() {
+  loadMoreButton.classList.add(hiddenClass);
+}
+
+function showLoadMoreButton() {
+  loadMoreButton.classList.remove(hiddenClass);
 }
 
 form.addEventListener('submit', onSearchSubmit);
 
 function fetchImages(q) {
-  showLoader();
-
   const params = new URLSearchParams({
     key: API_KEY,
     q: q,
@@ -64,15 +68,13 @@ function fetchImages(q) {
     per_page: 15,
     page: currentPage,
   });
-  console.log({q})
   const url = `${BASE_URL}?${params.toString()}`;
-  searchQuery = q;
   return axios.get(url);
 }
 
 async function onSearchSubmit(event) {
   event.preventDefault();
-  
+
   const searchInput = form.elements.search;
   const searchValue = searchInput.value.trim();
 
@@ -84,29 +86,39 @@ async function onSearchSubmit(event) {
     cardContainer.innerHTML = '';
     currentPage = 1;
   }
-  try {
-    const response = await fetchImages(searchValue);
 
-    createMarkup(response.data.hits);
-    
-    initializeLightbox();
-    console.log(response);
-    console.log(response.data.hits);
-    if (response.data.hits.length === 0) {
-      loadMoreButton.classList.add(hiddenClass);
-      
-      showErrorMessage('No results were found for your request.');
-    } else {
-      loadMoreButton.classList.remove(hiddenClass);
-      
-    }
+  await processImages(searchValue);
+  form.reset();
+}
+
+function processSideEffects(responseLength) {
+  if (responseLength === 0 && currentPage === 1) {
+    showErrorMessage('No results were found for your request.');
+    return;
+  }
+
+  if (responseLength < 15) {
+    showInfo("We're sorry, but you've reached the end of search results.");
+    return;
+  }
+
+  showLoadMoreButton();
+}
+
+async function processImages(q) {
+  try {
+    showLoader();
+    hideLoadMoreButton();
+    const response = await fetchImages(q);
+    searchQuery = q;
+    processSideEffects(response.data.hits.length);
+    renderImages(response.data.hits);
   } catch (error) {
     showErrorMessage(
       'Error fetching images: An error occurred while fetching images. Please try again later.'
     );
   } finally {
     hideLoader();
-    form.reset();
   }
 }
 
@@ -114,31 +126,11 @@ async function onSearchSubmit(event) {
 
 async function handleLoadMore(event) {
   currentPage += 1;
-
-  try {
-    const response = await fetchImages(searchQuery);
-    createMarkup(response.data.hits);
-    if (response.data.hits.length < 15) {
-      loadMoreButton.classList.add(hiddenClass);
-      showInfo("We're sorry, but you've reached the end of search results.")
-    }
-  } catch (error) {
-    showErrorMessage(
-      'Error fetching images: An error occurred while fetching images. Please try again later.'
-    );
-  } finally {
-    hideLoader();
-    initializeLightbox();
-
-
-  }
-};
+  await processImages(searchQuery);
+}
 // ===============================================
 
-  
-function createMarkup(images) {
-  
-
+function renderImages(images) {
   const markup = images
     .map(
       image => `
@@ -171,9 +163,5 @@ function createMarkup(images) {
     .join('');
 
   cardContainer.innerHTML += markup;
-}
-
-function initializeLightbox() {
-  const lightbox = new SimpleLightbox('.card_container a');
   lightbox.refresh();
 }

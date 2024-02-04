@@ -17,13 +17,12 @@ input {
 
 button {
   margin: 0;
-  background-color: #4E75FF;
+  background-color: #4e75ff;
   color: #fff;
   border-radius: 8px;
   width: 91px;
   height: 40px;
   font-size: 16px;
-
 }
 
 .card_container {
@@ -46,17 +45,20 @@ img {
 
 .info-item-count {
   text-align: center;
-
 }
- 
-.btn-show-more{
-  display: block;
+
+.btn-show-more {
   width: auto;
-  margin: 0 auto;
-  margin-top: 20px;
   padding: 1px 16px;
 }
 
-.is-hidden{
+.is-hidden {
   display: none;
+}
+
+.load-more-container {
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
